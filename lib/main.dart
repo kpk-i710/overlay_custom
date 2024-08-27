@@ -25,9 +25,17 @@ class CustomPopupExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 100),
-      child: MyWidget(),
+    return ListView(
+      children: [
+        ClickableText(
+          question: 'sdf sdf sdf',
+          onTapWord: (String word, Offset globalPosition, Size size) {},
+        ),
+        ClickableText(
+          question: 'sdf sdf sdf',
+          onTapWord: (String word, Offset globalPosition, Size size) {},
+        ),
+      ],
     );
   }
 }
