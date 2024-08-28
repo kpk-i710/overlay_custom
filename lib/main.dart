@@ -1,22 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+class ClickableText extends StatelessWidget {
+  final String question;
+  final Function(String word, LayerLink layerLink) onTapWord;
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  ClickableText({
+    required this.question,
+    required this.onTapWord,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Overlay Example',
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Overlay Example')),
-        body: const Center(
-          child: MyOverlayExample(),
-        ),
-      ),
+    final words = question.split(' ');
+
+    return Wrap(
+      textDirection: TextDirection.rtl,
+      children: words.map((word) {
+        final layerLink = LayerLink(); // LayerLink создан для каждого слова
+        return GestureDetector(
+          onTap: () {
+            onTapWord(word, layerLink);
+          },
+          child: CompositedTransformTarget(
+            link: layerLink,
+            child: Text(
+              '$word ',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                decoration: TextDecoration.underline,
+                decorationStyle: TextDecorationStyle.dotted,
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }
@@ -31,15 +51,16 @@ class MyOverlayExample extends StatefulWidget {
 class _MyOverlayExampleState extends State<MyOverlayExample> {
   OverlayEntry? _overlayEntry;
 
-  void _showOverlay(LayerLink layerLink) {
+  void _showOverlay(String word, LayerLink layerLink) {
+    _overlayEntry?.remove(); // Удаляем предыдущий оверлей перед показом нового
     _overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
         width: 100,
         height: 40,
         child: CompositedTransformFollower(
-          link: layerLink,
+          link: layerLink, // Используем переданный layerLink
           showWhenUnlinked: false,
-          offset: const Offset(0, -50), // Смещение оверлея над элементом
+          offset: const Offset(0, 0), // Смещение оверлея над элементом
           child: Material(
             color: Colors.blue,
             child: Center(
@@ -64,25 +85,34 @@ class _MyOverlayExampleState extends State<MyOverlayExample> {
   Widget build(BuildContext context) {
     return ListView(
       children: [
-        for (int i = 0; i < 10; i++)
-          Builder(
-            builder: (context) {
-              final layerLink = LayerLink();
-              return CompositedTransformTarget(
-                link: layerLink,
-                child: GestureDetector(
-                  onTap: () {
-                    _showOverlay(layerLink);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('Элемент $i'),
-                  ),
-                ),
-              );
-            },
-          ),
+        ClickableText(
+          question: 'sdf sdf sdf sdf dsfsd',
+          onTapWord: (String word, LayerLink layerLink) {
+            _showOverlay(word, layerLink);
+          },
+        ),
       ],
+    );
+  }
+}
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Overlay Example',
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Overlay Example')),
+        body: const Center(
+          child: MyOverlayExample(),
+        ),
+      ),
     );
   }
 }
