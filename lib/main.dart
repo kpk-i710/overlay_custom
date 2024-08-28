@@ -1,40 +1,87 @@
 import 'package:flutter/material.dart';
-import 'package:stackouside/item.dart';
-import 'package:stackouside/visit.dart';
 
-void main() => runApp(const MyApp());
+void main() {
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Overlay Example',
       home: Scaffold(
-        appBar: AppBar(title: const Text('Custom Popup Menu Example')),
+        appBar: AppBar(title: const Text('Overlay Example')),
         body: const Center(
-          child: CustomPopupExample(),
+          child: MyOverlayExample(),
         ),
       ),
     );
   }
 }
 
-class CustomPopupExample extends StatelessWidget {
-  const CustomPopupExample({super.key});
+class MyOverlayExample extends StatefulWidget {
+  const MyOverlayExample({Key? key}) : super(key: key);
+
+  @override
+  _MyOverlayExampleState createState() => _MyOverlayExampleState();
+}
+
+class _MyOverlayExampleState extends State<MyOverlayExample> {
+  OverlayEntry? _overlayEntry;
+
+  void _showOverlay(LayerLink layerLink) {
+    _overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        width: 100,
+        height: 40,
+        child: CompositedTransformFollower(
+          link: layerLink,
+          showWhenUnlinked: false,
+          offset: const Offset(0, -50), // Смещение оверлея над элементом
+          child: Material(
+            color: Colors.blue,
+            child: Center(
+              child: Text(
+                'Оверлей',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    Overlay.of(context)!.insert(_overlayEntry!);
+  }
+
+  void _hideOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       children: [
-        ClickableText(
-          question: 'sdf sdf sdf',
-          onTapWord: (String word, Offset globalPosition, Size size) {},
-        ),
-        ClickableText(
-          question: 'sdf sdf sdf',
-          onTapWord: (String word, Offset globalPosition, Size size) {},
-        ),
+        for (int i = 0; i < 10; i++)
+          Builder(
+            builder: (context) {
+              final layerLink = LayerLink();
+              return CompositedTransformTarget(
+                link: layerLink,
+                child: GestureDetector(
+                  onTap: () {
+                    _showOverlay(layerLink);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('Элемент $i'),
+                  ),
+                ),
+              );
+            },
+          ),
       ],
     );
   }
